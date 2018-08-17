@@ -46,23 +46,22 @@ func! FindVcsRoot() abort
 endf
 
 function! s:AddTagsOption(tagpath)
-	if &tags !~ a:tagpath
+	if &tags !~ a:tagpath && filereadable(a:tagpath)
 		let &tags = a:tagpath . ',' . &tags
 	endif
 endfunction
+
+function! s:LoadTagFile()
+    call FindVcsRoot()
+    call s:AddTagsOption(s:tagpath)
+endfunction
+call <SID>LoadTagFile()
 
 function! GenerateTags(tagname, tagSrc, ...) abort
 	if empty(FindVcsRoot()) | return -1 | endif
 
 	let tagpath = s:vsc_curdir . a:tagname
 	let realTagpath = resolve(tagpath)
-
-	" if filereadable(tagpath)
-        " if delete(tagpath)
-			" call s:ShowMsgHighlight("Tags file " . tagpath . "exists, but can't be deleted !")
-            " return -2
-        " endif
-	" endif
 
 	let tagOptStr = ' '
 	for item in g:tags4proj_tagsopt.opt
@@ -73,6 +72,7 @@ function! GenerateTags(tagname, tagSrc, ...) abort
 	let bgflag = ' &'
 	if a:0 > 0 && a:1 == 0 | let bgflag = '' | endif
 	let tagcmd = g:tags4proj_tagsbin . ' -f' . realTagpath . tagOptStr . ' &>/dev/zero ' . bgflag
+    call system("touch " . tagpath)
 	let out = system(tagcmd)
 
 	call s:AddTagsOption(tagpath)
@@ -92,45 +92,6 @@ function! GenerateTagsAll()
 	endfor
 
 	call GenerateTags(g:tags4proj_tagsname, tagSrc)
-endfunction
-
-function! GenerateTagsDelta()
-	call GenerateTags(g:tags4proj_tagsname_delta, expand('%:p'), 0)
-endfunction
-
-function! s:MakeBufferMap()
-	" nnoremap <nowait> <buffer> <silent> <C-]> :call LoadOrCreate(expand('<cword>'), 'tag ')<cr>
-	" vnoremap <nowait> <buffer> <silent> <C-]> "vy:call LoadOrCreate('<c-r>v', 'tag /')<cr>
-endfunction
-
-function! LoadOrCreate(tag, cmd)
-	if empty(taglist('^' . a:tag . '$'))
-		call GenerateTagsDelta()
-	endif
-	execute(a:cmd . a:tag)
-endfunction
-
-function! JumpToDefinition(tag)
-	let result = taglist('^' . a:tag . '$')
-
-	if len(result) <= 1
-		execute('tag ' . a:tag)
-		return 0
-	endif
-
-	let index = 1
-	for t in result
-		if t['kind'] == 'function'
-			execute('e ' . t['filename'])
-			let t['cmd'] = substitute(t['cmd'], '\/', '\/\\M', '')
-			execute(t['cmd'])
-			" execute(index . 'tag ' . a:tag)
-			return 0
-		endif
-		let index += 1
-	endfor
-
-	execute('tag ' . a:tag)
 endfunction
 
 command! -nargs=0 -bar GenerateProjectTags call GenerateTagsAll()
