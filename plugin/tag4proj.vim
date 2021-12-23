@@ -26,7 +26,7 @@ function! s:ShowMsgHighlight(msg)
 endfunction
 
 func! FindVcsRoot() abort
-  let s:searchdir = [expand('%:p:h'), getcwd()]
+  let s:searchdir = [$ORIG_PWD, expand('%:p:h'), getcwd()]
 
   let vsc_dir = ''
   for d in s:searchdir
