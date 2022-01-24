@@ -90,8 +90,7 @@ function! GenerateTags(tagname, tagSrc, ...) abort
 
   let bgflag = ' &'
   if a:0 > 0 && a:1 == 0 | let bgflag = '' | endif
-  let tagcmd = g:tags4proj_tagsbin . ' -f' . realTagpath . tagOptStr . ' &>/dev/zero ' . bgflag
-    call system("touch " . tagpath)
+  let tagcmd = g:tags4proj_tagsbin . ' -f ' . realTagpath . tagOptStr . ' &>/dev/zero ' . bgflag
   let out = system(tagcmd)
 
   call s:AddTagsOption(tagpath)
