@@ -12,7 +12,7 @@ let g:tags4proj_tagsbin = 'ctags'
 
 if !exists('g:tags4proj_tagsopt')
   let g:tags4proj_tagsopt = {
-        \ 'opt': ['-R'],
+        \ 'opt': ['-R', '--excmd=combine'],
         \ 'inc': ['.'],
         \ 'exclude': ['*.css'],
         \}
