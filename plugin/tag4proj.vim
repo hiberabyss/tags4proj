@@ -45,7 +45,7 @@ func! FindVcsRoot() abort
 endf
 
 function! s:AddTagsOption(tagpath)
-  if &tags !~ a:tagpath && filereadable(a:tagpath)
+  if &tags !~ escape(a:tagpath, '~') && filereadable(a:tagpath)
     let g:tags4proj_tagpath = a:tagpath
     let &tags = a:tagpath . ',' . &tags
   endif
